@@ -10,8 +10,8 @@ class PayPalAccess{
     private $key = 'YOUR KEY';
     private $secret = 'YOUR SECRET';
     private $scopes = 'YOUR SCOPES';                    //e.g. openid email profile https://uri.paypal.com/services/paypalattributes
-    private $state = time() . rand();
-    private $callback_url = 'YOUR CALLBACK ENDPOINT';
+    private $state;
+    private $return_url = 'YOUR CALLBACK ENDPOINT';
     
     private $access_token;
     private $refresh_token;
@@ -24,13 +24,25 @@ class PayPalAccess{
     * to in order to log in and authorize access permissions.
     * 
     */
+    public function __construct(){
+        $this->state = time().rand();
+    }
+    
+    /**
+    * Get Auth URL
+    *
+    * Obtain the auth URL on PayPal to which the user should be forwarded
+    * to in order to log in and authorize access permissions.
+    * 
+    */
     public function get_auth_url(){
+        $nonce = time() . rand();
         $auth_url = sprintf("%s?client_id=%s&response_type=code&scope=%s&redirect_uri=%s&nonce=%s&state=%s",
                             AUTHORIZATION_ENDPOINT,
                             $this->key,
                             $this->scopes,
-                            urlencode($this->callback_url),
-                            time() . rand(),
+                            urlencode($this->return_url),
+                            $nonce,
                             $this->state);
             
         return $auth_url;
@@ -51,7 +63,7 @@ class PayPalAccess{
                             $this->key,
                             $this->secret,
                             $code,
-                            urlencode($this->callback_url));
+                            urlencode($this->return_url));
         
         $token = json_decode($this->run_curl(ACCESS_TOKEN_ENDPOINT, "POST", $postvals));
         
@@ -128,7 +140,7 @@ class PayPalAccess{
                                LOGOUT_ENDPOINT,
                                $this->id_token,
                                $this->state,
-                               $this->callback_url . "&logout=true");
+                               $this->return_url . "&logout=true");
         
         $this->run_curl($logout_url);
     }
