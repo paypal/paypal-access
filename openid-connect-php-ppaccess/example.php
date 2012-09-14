@@ -9,15 +9,23 @@ $ppaccess = new PayPalAccess();
 if (isset($_GET['code'])){
     //make request to exchange code for an access token
     $token = $ppaccess->get_access_token();
+    echo "<h1>Token</h1>";
+    print_r($token);
     
     //use access token to get user profile
     $profile = $ppaccess->get_profile();
+    echo "<h1>User Profile</h1>";
+    print_r($profile);
     
     //make request to refresh an expired access token
     $refreshed = $ppaccess->refresh_access_token();
+    echo "<h1>Refreshed Token</h1>";
+    print_r($refreshed);
     
     //validate the id token and provide back validation object
     $verify = $ppaccess->validate_token();
+    echo "<h1>Token Validation</h1>";
+    print_r($verify);
     
     //log the user out
     $ppaccess->end_session();
