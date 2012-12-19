@@ -131,7 +131,7 @@ class PayPalAccess:
     " again with their PayPal credentials.
     """
     def end_session(self):
-        self.profile_url = "%s?id_token=%s&redirect_url=%s" % (PayPalAccess.logout_endpoint, PayPalAccess.id_token, PayPalAccess.callback_url + "&logout=true")
+        self.profile_url = "%s?id_token=%s&redirect_uri=%s" % (PayPalAccess.logout_endpoint, PayPalAccess.id_token, PayPalAccess.callback_url + "&logout=true")
         
         self.request = urllib2.Request(self.profile_url)
         self.response = urllib2.urlopen(self.request)

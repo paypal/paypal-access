@@ -156,7 +156,7 @@ class PayPalAccess{
                                LOGOUT_ENDPOINT,
                                $this->id_token,
                                $this->state,
-                               $this->return_url . "&logout=true");
+                               $this->return_uri . "&logout=true");
         
         $this->run_curl($logout_url);
     }
