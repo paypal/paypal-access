@@ -152,11 +152,11 @@ class PayPalAccess{
     * 
     */
     public function end_session(){
-        $logout_url = sprintf("%s?id_token=%s&state=%s&redirect_url=%s",
+        $logout_url = sprintf("%s?id_token=%s&state=%s&redirect_uri=%s",
                                LOGOUT_ENDPOINT,
                                $this->id_token,
                                $this->state,
-                               $this->return_uri . "&logout=true");
+                               $this->return_url . "&logout=true");
         
         $this->run_curl($logout_url);
     }
