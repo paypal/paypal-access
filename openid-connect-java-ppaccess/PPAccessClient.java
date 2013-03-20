@@ -1,4 +1,4 @@
-package com.billmelater.ppaccess;
+package com.billmelater.acquisition;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -17,15 +17,15 @@ import sun.misc.BASE64Encoder;
  * Client implementation to get user information using PayPal Access. First step of getting code from PayPal access has
  * to be done manually. You can use <code>authorizeUrl</code> generated to get code. Uses java.net implementation to do
  * REST calls and Jackson API to parse JSON response.
- * 
+ *
  * @author Abhijith Prabhakar
- * 
+ *
  */
 public class PPAccessClient {
 
     /**
      * Each method call dissipates a step in OpenId Connect specification.
-     * 
+     *
      * @param args - it do not send anything
      * @throws IOException
      */
@@ -38,19 +38,31 @@ public class PPAccessClient {
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
         String authorizationCode = in.readLine();
 
-        String accessToken = getAccessToken(authorizationCode);
+        Map<String, Object> responseMap = getResponseMap(authorizationCode);
+        String accessToken = (String) responseMap.get("access_token");
+        String idToken = (String) responseMap.get("id_token");
         System.out.println("Access token for this request: " + accessToken);
+        System.out.println("Id token for this request: " + idToken);
         Map<String, Object> userInfo = getUserInfo(accessToken);
-
+        System.out.println(" ****** User Info endpoint ***** ");
         for (Map.Entry<String, Object> entry : userInfo.entrySet()) {
             System.out.println(entry.getKey() + " " + entry.getValue());
         }
+        System.out.println(" ***** Check Id Endpoint **** ");
+        Map<String, Object> checkIdMap = getCheckId(idToken);
+        for (Map.Entry<String, Object> entry : checkIdMap.entrySet()) {
+            System.out.println(entry.getKey() + " " + entry.getValue());
+        }
+
+        System.out.println(" *** End session Endpoint ***");
+    endSession(idToken);
+
         in.close();
     }
 
     /**
      * Creates an authorization URL so that user can paste this in browser to get authorization code.
-     * 
+     *
      * @return - Authorization URL
      */
     private static String getAuthorizationUrl() {
@@ -61,28 +73,28 @@ public class PPAccessClient {
         authUrl.append("&response_type=code");
         authUrl.append("&scope=openid profile email address");
         authUrl.append("&nonce=" + createNonce());
-        authUrl.append("&redirect_uri=<URL GIVEN WHILE REGISTERING THE APP>");
+        authUrl.append("&redirect_uri=<REPLACE ME>");
         return authUrl.toString();
     }
 
     /**
      * Gets Access token by going to token service. Code is left blank so that user can fill it up manually.
-     * 
+     *
      * @return - Access token
      */
-    private static String getAccessToken(String authorizationCode) {
+    private static Map<String, Object> getResponseMap(String authorizationCode) {
         StringBuilder tokenUrl = new StringBuilder(
                 "https://www.paypal.com/webapps/auth/protocol/openidconnect/v1/tokenservice");
         tokenUrl.append("?grant_type=authorization_code");
         // code should be obtained manually and pasted here.
         tokenUrl.append("&code=" + authorizationCode);
         Map<String, Object> responseMap = getResponse(tokenUrl.toString(), "POST", "Basic " + getAuthorizationHeader());
-        return (String) responseMap.get("access_token");
+        return responseMap;
     }
 
     /**
      * Gets user info based on <code>accesstoken</code> passed.
-     * 
+     *
      * @param accessToken - Access token acquired via token service.
      * @return - User Information map.
      */
@@ -95,7 +107,7 @@ public class PPAccessClient {
 
     /**
      * Java SDK implementation to make rest calls.
-     * 
+     *
      * @param urlStr - URL to be used.
      * @param method - HTTP Method
      * @param authHeader - Authorization header value
@@ -106,7 +118,9 @@ public class PPAccessClient {
             URL url = new URL(urlStr);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod(method);
-            conn.setRequestProperty("Authorization", authHeader);
+            if(authHeader != null){
+                conn.setRequestProperty("Authorization", authHeader);
+            }
             conn.setRequestProperty("Accept", "application/json");
 
             if (conn.getResponseCode() != 200) {
@@ -136,7 +150,7 @@ public class PPAccessClient {
 
     /**
      * Authorization header required for token service.
-     * 
+     *
      * @return - Base64 encoded value of client id and secret
      */
     private static String getAuthorizationHeader() {
@@ -152,7 +166,7 @@ public class PPAccessClient {
     /**
      * Generates a unique nonce for every request. Created this way based on recommendation from PayPal Access team.
      * User is free to choose anything you want.
-     * 
+     *
      * @return - generated nonce
      */
     private static String createNonce() {
@@ -166,6 +180,32 @@ public class PPAccessClient {
         retValue = (System.currentTimeMillis() + encodedValue);
         return retValue;
 
+    }
+
+    /**
+     * Gives the Url to end session.
+     * @param idToken
+     */
+    private static void endSession(String idToken) {
+        StringBuilder endsessionUrl = new StringBuilder(
+                "https://www.paypal.com/webapps/auth/protocol/openidconnect/v1/endsession");
+        endsessionUrl.append("?idToken=" + idToken);
+        endsessionUrl.append("&logout=true");
+        endsessionUrl.append("&redirect_uri=<REPLACE ME>");
+        System.out.println("Put this URL on browser to end session " + endsessionUrl.toString());
+    }
+
+    /**
+     * Checks if given token is still valid.
+     * @param idToken
+     * @return Return variables as Map
+     */
+    private static Map<String, Object> getCheckId(String idToken) {
+        StringBuilder checkIdUrl = new StringBuilder(
+                "https://www.paypal.com/webapps/auth/protocol/openidconnect/v1/checkid");
+        checkIdUrl.append("?access_token=" + idToken);
+        Map<String, Object> responseMap = getResponse(checkIdUrl.toString(), "GET", null);
+        return  responseMap;
     }
 
 }
