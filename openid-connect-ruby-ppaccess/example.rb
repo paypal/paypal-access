@@ -14,6 +14,9 @@
 # limitations under the License.
 #
 
+require 'rubygems'
+require 'bundler/setup'
+
 require 'sinatra'
 require './access.rb'
 
@@ -30,17 +33,25 @@ get '/rubyauth' do
 end 
 
 get '/profile' do
-  access.get_profile()
+  pretty(access.get_profile())
 end
 
 get '/refresh' do
-  access.refresh_access_token()
+  pretty(access.refresh_access_token())
 end
 
 get '/validate' do
-  access.validate()
+  pretty(access.validate())
 end
 
 get '/logout' do
-  access.logout()
+  pretty(access.logout())
+end
+
+def pretty(body)
+  if body.nil?
+  else
+    puts JSON.pretty_generate(JSON.parse(body))
+    "<pre>#{JSON.pretty_generate(JSON.parse(body))}</pre>"
+  end
 end
