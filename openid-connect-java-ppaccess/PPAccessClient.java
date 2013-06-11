@@ -195,7 +195,10 @@ public class PPAccessClient {
 
 		String authString = clientId + ":" + clientSecret;
 		BASE64Encoder encoder = new BASE64Encoder();
-		return encoder.encode(authString.getBytes());
+		String header = encoder.encode(authString.getBytes());
+		header = header.replace("\n", "");
+		header = header.replace("\r", "");
+		return header;
 	}
 
 	/**
