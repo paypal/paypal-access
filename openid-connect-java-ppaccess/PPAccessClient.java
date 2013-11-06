@@ -229,7 +229,7 @@ public class PPAccessClient {
 	private static String getSessionLogOutURL(String idToken) {
 		StringBuilder endsessionUrl = new StringBuilder(
 				"https://www.paypal.com/webapps/auth/protocol/openidconnect/v1/endsession");
-		endsessionUrl.append("?idToken=" + idToken);
+		endsessionUrl.append("?id_token=" + idToken);
 		endsessionUrl.append("&logout=true");
 		endsessionUrl.append("&redirect_uri=<REPLACE ME>");
 		return endsessionUrl.toString();
