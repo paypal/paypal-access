@@ -17,7 +17,7 @@
 
 //PayPal Access OpenID Connect Endpoints
 define('AUTHORIZATION_ENDPOINT', 'https://www.paypal.com/webapps/auth/protocol/openidconnect/v1/authorize');
-define('ACCESS_TOKEN_ENDPOINT', 'https://www.paypal.com/webapps/auth/protocol/openidconnect/v1/tokenservice');
+define('ACCESS_TOKEN_ENDPOINT', 'https://api.paypal.com/webapps/auth/protocol/openidconnect/v1/tokenservice');
 define('PROFILE_ENDPOINT', 'https://www.paypal.com/webapps/auth/protocol/openidconnect/v1/userinfo');
 define('LOGOUT_ENDPOINT', 'https://www.paypal.com/webapps/auth/protocol/openidconnect/v1/endsession');
 define('VALIDATE_ENDPOINT', 'https://www.paypal.com/webapps/auth/protocol/openidconnect/v1/checkid');
